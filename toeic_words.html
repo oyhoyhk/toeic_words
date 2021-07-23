@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./toeic_words.css">
+    <script>
+        function load() {
+            loadList();
+            const submit = document.getElementById('submit');
+            const korean = document.getElementById('inputKorean');
+            const visible = document.getElementById('visible');
+
+            korean.addEventListener('keypress',e=>{
+                if(e.code==='Enter'){
+                    enrollWord();
+                }
+            })
+            submit.addEventListener('click',()=>{
+               enrollWord();
+            })
+
+            visible.addEventListener('change',e=>{
+                const koreanWords=document.querySelectorAll('.korean_word');
+                function intoBlack (el) {
+                       el.target.style.color='black'
+                }
+                function intoWhite (el) {
+                    el.target.style.color='white';
+                }
+                if(e.target.checked===true){
+                   koreanWords.forEach(el=> {
+                       el.style.color='white';
+                       el.addEventListener('mouseenter', intoBlack);
+                       el.addEventListener('mouseleave', intoWhite)
+                   });
+                }else{
+                    koreanWords.forEach(el=> {
+                        el.style.color='black';
+                        el.removeEventListener('mouseenter',intoBlack);
+                        el.removeEventListener('mouseleave',intoWhite);
+                    });
+                }
+            })
+        }
+        function loadList () {
+            const httpRequest = new XMLHttpRequest();
+            httpRequest.onload = function(data){
+                const list = JSON.parse(data.target.response);
+                const wordsListsContainer = document.getElementById('words_lists_container');
+                let count = 0;
+                var wordsContainer = document.createElement('div');
+                wordsContainer.classList.add("words_container");
+                wordsListsContainer.appendChild(wordsContainer);
+                for(let key in list){
+                    const wordBox = document.createElement('div');
+                    wordBox.classList.add('word_box');
+                    const englishWord = document.createElement('div');
+                    englishWord.classList.add('english_word');
+                    englishWord.textContent=key;
+                    const koreanWord = document.createElement('div');
+                    koreanWord.textContent=list[key];
+                    koreanWord.classList.add('korean_word');
+                    wordBox.appendChild(englishWord);
+                    wordBox.appendChild(koreanWord);
+                    wordsContainer.appendChild(wordBox);
+                    count++;
+                    if(count%30==0){
+                        wordsContainer=document.createElement('div');
+                        wordsContainer.classList.add('words_container');
+                        wordsListsContainer.appendChild(wordsContainer);
+
+                    }
+                }
+            }
+            httpRequest.open('GET', 'http://localhost:8000');
+            httpRequest.send(null);
+        }
+        function enrollWord(){
+            const submit = document.getElementById('submit');
+            const english = document.getElementById('inputEnglish');
+            const korean = document.getElementById('inputKorean');
+
+            const httpRequest = new XMLHttpRequest();
+                if(!english.value || !korean.value){
+                    alert('단어를 입력해주세요');
+                    english.value='';
+                    korean.value='';
+                    return;
+                }
+                httpRequest.open('POST','http://localhost:8000');
+                httpRequest.setRequestHeader('Content-Type', 'text/plain');
+                httpRequest.send(english.value+'-'+korean.value);
+                httpRequest.onload=function (data){
+                    const answer = data.target.response;
+                   if(answer ==='existing'){
+                       alert("이미 존재하는 단어입니다!")
+                   }
+                   english.value='';
+                   korean.value='';
+                }
+
+        }
+        window.onload=load;
+    </script>
+</head>
+<body>
+    <h1>토익 영단어 도우미</h1>
+    <div id="option_box">
+        <div id="input_word_box">
+            <input type="text" id="inputEnglish" placeholder="English...">
+            <input type="text" id="inputKorean" placeholder="Korean..."> 
+            <button id="submit">입력</button>
+        </div>
+        <label id="visible_label" for="visible">한글가리기 <input id ="visible" name="visible" type="checkbox"></label>
+    </div>
+    <fieldset id="word_list">
+        <legend>단어 리스트</legend>
+        <div id="words_lists_container"></div>
+    </fieldset>
+    <fieldset id="difficult_list">
+        <legend>어려운 단어</legend>
+    </fieldset>
+</body>
+</html>

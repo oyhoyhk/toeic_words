@@ -1,0 +1,70 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+body{
+    width:100vw;
+    height:100vh;
+}
+h1{
+    text-align:center
+}
+#option_box{
+    width:100%;
+    display:flex;
+    justify-content:center;
+    position:relative;
+}
+#visible_label{
+    position:absolute;
+    right:10%
+}
+#word_list{
+    margin:0 auto;
+    margin-top:50px;
+    width:90%;
+    height:50%;
+    border:1px solid black;
+}
+#difficult_list{
+    margin:0 auto;
+    margin-top:50px;
+    width:90%;
+    height:30%;
+    border:1px solid black;
+}
+legend
+{
+    text-align:center;
+}
+#words_lists_container{
+    width:100%;
+    height:100%;
+    padding:10px 20px;
+    display:flex;
+    justify-content:flex-start;
+}
+.words_container{
+    display:inline-block;
+    width:250px;
+    height:100%;
+    border:1px solid black;
+    display:flex;
+    justify-content:flex-start;
+    flex-direction:column;
+}
+.word_box{
+    border:1px solid black;
+    display:flex;
+    justify-content:space-between;
+}
+.english_word{
+    width:50%;
+    border-right:1px solid black;
+}
+.korean_word{
+    width:50%;
+    white-space:nowrap;
+    overflow:hidden;
+}
