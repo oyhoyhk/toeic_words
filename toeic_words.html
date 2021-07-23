@@ -10,9 +10,11 @@
         function load() {
             loadList();
             const submit = document.getElementById('submit');
+            const english = document.getElementById('inputEnglish');
             const korean = document.getElementById('inputKorean');
             const visible = document.getElementById('visible');
 
+            english.focus();
             korean.addEventListener('keypress',e=>{
                 if(e.code==='Enter'){
                     enrollWord();
@@ -65,13 +67,23 @@
                     koreanWord.classList.add('korean_word');
                     wordBox.appendChild(englishWord);
                     wordBox.appendChild(koreanWord);
+                    wordBox.addEventListener('dblclick',()=>{
+                        console.log(key);
+                        httpRequest.open('POST','http://localhost:8000/delete');
+                        httpRequest.setRequestHeader('Content-Type','text/plain');
+                        httpRequest.send(key);
+                        httpRequest.onload=()=>{
+                            console.log('delete 성공');
+                            wordsListsContainer.innerHTML='';
+                            loadList();
+                        }
+                    })
                     wordsContainer.appendChild(wordBox);
                     count++;
-                    if(count%30==0){
+                    if(count%20==0){
                         wordsContainer=document.createElement('div');
                         wordsContainer.classList.add('words_container');
                         wordsListsContainer.appendChild(wordsContainer);
-
                     }
                 }
             }
@@ -110,11 +122,15 @@
     <h1>토익 영단어 도우미</h1>
     <div id="option_box">
         <div id="input_word_box">
-            <input type="text" id="inputEnglish" placeholder="English...">
+            <input type="text" id="inputEnglish" placeholder="English..." focus>
             <input type="text" id="inputKorean" placeholder="Korean..."> 
             <button id="submit">입력</button>
         </div>
-        <label id="visible_label" for="visible">한글가리기 <input id ="visible" name="visible" type="checkbox"></label>
+        <div class="options">
+            <button id="random">단어 섞기</button>
+            <label  for="visible">한글가리기 <input id ="visible" name="visible" type="checkbox"></label>
+
+        </div>
     </div>
     <fieldset id="word_list">
         <legend>단어 리스트</legend>

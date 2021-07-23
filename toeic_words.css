@@ -16,7 +16,7 @@ h1{
     justify-content:center;
     position:relative;
 }
-#visible_label{
+.options{
     position:absolute;
     right:10%
 }
@@ -47,24 +47,28 @@ legend
 }
 .words_container{
     display:inline-block;
-    width:250px;
+    width:300px;
     height:100%;
-    border:1px solid black;
     display:flex;
     justify-content:flex-start;
     flex-direction:column;
+    margin-right:30px;
+
 }
 .word_box{
-    border:1px solid black;
     display:flex;
     justify-content:space-between;
 }
 .english_word{
-    width:50%;
+    width:40%;
     border-right:1px solid black;
 }
 .korean_word{
     width:50%;
     white-space:nowrap;
     overflow:hidden;
+}
+
+#random{
+    margin-right:20px;
 }
