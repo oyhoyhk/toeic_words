@@ -2,6 +2,8 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
+    white-space: nowrap;
+    overflow:hidden;
 }
 body{
     width:100vw;
@@ -11,25 +13,33 @@ h1{
     text-align:center
 }
 #option_box{
-    width:100%;
+    width:90%;
+    height:30px;
+    margin:0 auto;
     display:flex;
-    justify-content:center;
+    justify-content:space-between;
+    align-items:center;
     position:relative;
 }
-.options{
-    position:absolute;
-    right:10%
+#inputEnglish{
+    ime-mode: inactive;
+}
+#drag_box{
+    width:150px;
+    height:100%;
 }
 #word_list{
     margin:0 auto;
-    margin-top:50px;
+    margin-top:10px;
     width:90%;
-    height:50%;
+    height:85%;
     border:1px solid black;
+    overflow:hidden;
 }
 #difficult_list{
+    display:none;
     margin:0 auto;
-    margin-top:50px;
+    margin-top:40px;
     width:90%;
     height:30%;
     border:1px solid black;
@@ -47,17 +57,20 @@ legend
 }
 .words_container{
     display:inline-block;
-    width:300px;
+    width:330px;
     height:100%;
     display:flex;
     justify-content:flex-start;
     flex-direction:column;
-    margin-right:30px;
-
+    margin-right:45px;
+}
+.words_container:last-of-type{
+    margin-right:0;
 }
 .word_box{
     display:flex;
     justify-content:space-between;
+    
 }
 .english_word{
     width:40%;
@@ -71,4 +84,30 @@ legend
 
 #random{
     margin-right:20px;
+}
+.pagenation_box{
+    position:absolute;
+    bottom:0.5%;
+    width:100%;
+    height:5%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+#pagenation{
+    width:30%;
+    height:100%;
+    display:flex;
+    justify-content:space-around;
+    font-size:1.5rem;
+    color:#bbb;
+}
+.currentPage{
+    color:black;
+    font-weight:bold;
+}
+@media screen and (max-width:1000px){
+    #drag_box{
+        display:none;
+    }
 }

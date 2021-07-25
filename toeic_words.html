@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Toeic Words</title>
     <link rel="stylesheet" href="./toeic_words.css">
     <script>
         function load() {
+            let currentPage;
+         
             loadList();
             const submit = document.getElementById('submit');
             const english = document.getElementById('inputEnglish');
@@ -20,72 +22,67 @@
                     enrollWord();
                 }
             })
+
             submit.addEventListener('click',()=>{
                enrollWord();
             })
-
+            english.addEventListener('keypress',(e)=>{
+                if(e.shiftKey && e.code==='Enter'){
+                   window.open(`https://dict.naver.com/search.dict?dicQuery=${e.target.value}&query=${e.target.value}&target=dic&ie=utf8&query_utf=&isOnlyViewEE=`,'네이버 사전',"width=500,height=600,scrollbars=no")
+                   e.target.value='';
+                }
+            })
             visible.addEventListener('change',e=>{
                 const koreanWords=document.querySelectorAll('.korean_word');
-                function intoBlack (el) {
-                       el.target.style.color='black'
-                }
-                function intoWhite (el) {
-                    el.target.style.color='white';
-                }
+                
                 if(e.target.checked===true){
                    koreanWords.forEach(el=> {
                        el.style.color='white';
-                       el.addEventListener('mouseenter', intoBlack);
-                       el.addEventListener('mouseleave', intoWhite)
+                       el.addEventListener('mouseenter', intoBlack, true);
+                       el.addEventListener('mouseleave', intoWhite, true)
                    });
-                }else{
+                }else if(e.target.checked===false){
                     koreanWords.forEach(el=> {
                         el.style.color='black';
-                        el.removeEventListener('mouseenter',intoBlack);
-                        el.removeEventListener('mouseleave',intoWhite);
+                        el.removeEventListener('mouseenter',intoBlack,true);
+                        el.removeEventListener('mouseleave',intoWhite,true);
                     });
                 }
             })
+            function intoBlack (el) {
+                el.target.style.color='black'
+            }
+            function intoWhite (el) {
+                el.target.style.color='white';
+            }
         }
         function loadList () {
             const httpRequest = new XMLHttpRequest();
             httpRequest.onload = function(data){
-                const list = JSON.parse(data.target.response);
-                const wordsListsContainer = document.getElementById('words_lists_container');
-                let count = 0;
-                var wordsContainer = document.createElement('div');
-                wordsContainer.classList.add("words_container");
-                wordsListsContainer.appendChild(wordsContainer);
-                for(let key in list){
-                    const wordBox = document.createElement('div');
-                    wordBox.classList.add('word_box');
-                    const englishWord = document.createElement('div');
-                    englishWord.classList.add('english_word');
-                    englishWord.textContent=key;
-                    const koreanWord = document.createElement('div');
-                    koreanWord.textContent=list[key];
-                    koreanWord.classList.add('korean_word');
-                    wordBox.appendChild(englishWord);
-                    wordBox.appendChild(koreanWord);
-                    wordBox.addEventListener('dblclick',()=>{
-                        console.log(key);
-                        httpRequest.open('POST','http://localhost:8000/delete');
-                        httpRequest.setRequestHeader('Content-Type','text/plain');
-                        httpRequest.send(key);
-                        httpRequest.onload=()=>{
-                            console.log('delete 성공');
-                            wordsListsContainer.innerHTML='';
-                            loadList();
-                        }
-                    })
-                    wordsContainer.appendChild(wordBox);
-                    count++;
-                    if(count%20==0){
-                        wordsContainer=document.createElement('div');
-                        wordsContainer.classList.add('words_container');
-                        wordsListsContainer.appendChild(wordsContainer);
-                    }
-                }
+                listData = stringToArray(data.target.response);  
+                let list=splitArray(listData,window.innerWidth)
+                const random = document.getElementById('random');
+                currentPage=list.length;
+                console.log(list);
+                console.log(currentPage);
+                createWordsList(list[currentPage-1]);
+                createPagenation(list.length,list,currentPage)
+
+                console.log(listData);
+                window.addEventListener('resize',(e)=>{
+                    list = splitArray(listData, window.innerWidth);
+                    currentPage=list.length;
+                    createWordsList(list[currentPage-1]);
+                    createPagenation(list.length,list,currentPage)
+                })
+
+                random.addEventListener('click',()=>{
+                    listData=randomize(listData);
+                    list = splitArray(listData,window.innerWidth);
+                    console.log(listData)
+                    console.log(list);
+                    createWordsList(list[currentPage-1]);
+                })
             }
             httpRequest.open('GET', 'http://localhost:8000');
             httpRequest.send(null);
@@ -115,14 +112,108 @@
                 }
 
         }
+        function stringToArray(str){
+            const list = JSON.parse(str);
+            const arr =[];
+            for(let key in list){
+                arr.push([key,list[key]]);
+            }
+           
+            return arr;
+        }
+        function splitArray(arr,windowWidth){
+            const temp=[...arr];
+            const result =[];
+            while(temp.length!==0){
+                result.push(temp.splice(0,windowWidth > 1000 ? 132 : 66));
+            }
+            return result
+        }
+        function createWordsList(list){
+            const httpRequest = new XMLHttpRequest();
+            const wordsListsContainer = document.getElementById('words_lists_container');
+            wordsListsContainer.innerHTML='';
+            let count = 0;
+            var wordsContainer = document.createElement('div');
+            wordsContainer.classList.add("words_container");
+            wordsListsContainer.appendChild(wordsContainer);
+            for(let i=0;i<list.length;i++){
+                const wordBox = document.createElement('div');
+                wordBox.classList.add('word_box');
+                const englishWord = document.createElement('div');
+                englishWord.classList.add('english_word');
+                englishWord.textContent=list[i][0];
+                const koreanWord = document.createElement('div');
+                koreanWord.textContent=list[i][1];
+                koreanWord.classList.add('korean_word');
+                wordBox.appendChild(englishWord);
+                wordBox.appendChild(koreanWord);
+                wordBox.addEventListener('dblclick',()=>{
+                    console.log(list[i]);
+                    httpRequest.open('POST','http://localhost:8000/delete');
+                    httpRequest.setRequestHeader('Content-Type','text/plain');
+                    httpRequest.send(list[i][0]);
+                    httpRequest.onload=()=>{
+                        console.log('delete 성공');
+                        wordsListsContainer.innerHTML='';
+                        loadList();
+                    }
+                })
+                wordsContainer.appendChild(wordBox);
+                count++;
+                if(count%33==0){
+                    wordsContainer=document.createElement('div');
+                    wordsContainer.classList.add('words_container');
+                    wordsListsContainer.appendChild(wordsContainer);
+                }
+            }
+        }
+        function createPagenation(length,list,currentPage){
+            const pagenation=document.getElementById('pagenation');
+            console.log('in createPagenation', currentPage);
+            pagenation.innerHTML='';
+            if(length===1){
+                pagenation.style.display='none';
+            }else{
+                pagenation.style.display='flex';
+                for(let i=1;i<=length;i++){
+                    const div = document.createElement('div');
+                    div.style.cursor='pointer';
+                    div.textContent=i;
+                    if(i===currentPage){
+                        div.classList.add('currentPage');
+                    }
+                    div.addEventListener('click',()=>{
+                        console.log(currentPage);
+                        currentPage=i;
+                        createWordsList(list[currentPage-1]);
+                        createPagenation(length,list,currentPage);
+                    })
+                    pagenation.appendChild(div);
+                }
+            }
+            
+
+        }
+        function randomize (arr){
+                const res =[];
+                const counts=arr.length;
+                for(let i=0;i<counts;i++){
+                    const randomNum = Math.floor(Math.random()*(arr.length));
+                    res.push(arr.splice(randomNum,1)[0]);
+                }
+                return res;
+            }
+
         window.onload=load;
     </script>
 </head>
 <body>
     <h1>토익 영단어 도우미</h1>
     <div id="option_box">
+        <div id="drag_box"></div>
         <div id="input_word_box">
-            <input type="text" id="inputEnglish" placeholder="English..." focus>
+            <input type="text" id="inputEnglish" placeholder="English..."  pattern="[A-Za-z0-9]*">
             <input type="text" id="inputKorean" placeholder="Korean..."> 
             <button id="submit">입력</button>
         </div>
@@ -134,10 +225,14 @@
     </div>
     <fieldset id="word_list">
         <legend>단어 리스트</legend>
-        <div id="words_lists_container"></div>
+        <div id="words_lists_container">
+        </div>
     </fieldset>
     <fieldset id="difficult_list">
         <legend>어려운 단어</legend>
     </fieldset>
+    <div class="pagenation_box">
+        <div id="pagenation"></div>
+    </div>
 </body>
 </html>
