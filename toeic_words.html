@@ -9,13 +9,37 @@
     <script>
         function load() {
             let currentPage;
-         
+            let mode='default';
+            let defaultList, diffList;
             loadList();
             const submit = document.getElementById('submit');
             const english = document.getElementById('inputEnglish');
             const korean = document.getElementById('inputKorean');
             const visible = document.getElementById('visible');
+            const dragBox = document.getElementById('drag_box');
 
+            dragBox.addEventListener('dragenter',(e)=>{
+                e.target.classList.add('drag_box_hover');
+            })
+            dragBox.addEventListener('dragleave',(e)=>{
+                e.target.classList.remove('drag_box_hover');    
+            })
+            dragBox.addEventListener('dragover',e=>{
+                e.preventDefault();
+            })
+            dragBox.addEventListener('drop',(e)=>{
+                e.target.classList.remove('drag_box_hover');
+                const data = e.dataTransfer.getData("text")
+                const httpRequest = new XMLHttpRequest();
+                httpRequest.onload=(data)=>{
+                    console.log('어려운단어등록 성공');
+                    console.log(data.target.response);
+                }
+                httpRequest.open('POST', 'http://localhost:8000/difficult');
+                httpRequest.setRequestHeader('Content-Type', 'text/plain');
+                httpRequest.send(data);
+              
+            })  
             english.focus();
             korean.addEventListener('keypress',e=>{
                 if(e.code==='Enter'){
@@ -29,7 +53,7 @@
             english.addEventListener('keypress',(e)=>{
                 if(e.shiftKey && e.code==='Enter'){
                    window.open(`https://dict.naver.com/search.dict?dicQuery=${e.target.value}&query=${e.target.value}&target=dic&ie=utf8&query_utf=&isOnlyViewEE=`,'네이버 사전',"width=500,height=600,scrollbars=no")
-                   e.target.value='';
+                   document.getElementById('inputKorean').focus();
                 }
             })
             visible.addEventListener('change',e=>{
@@ -59,16 +83,17 @@
         function loadList () {
             const httpRequest = new XMLHttpRequest();
             httpRequest.onload = function(data){
-                listData = stringToArray(data.target.response);  
+                const temp = data.target.response.split('_');
+                defaultList = temp[0];
+                diffList = temp[1];
+                listData = stringToArray(defaultList);  
                 let list=splitArray(listData,window.innerWidth)
                 const random = document.getElementById('random');
                 currentPage=list.length;
-                console.log(list);
-                console.log(currentPage);
                 createWordsList(list[currentPage-1]);
                 createPagenation(list.length,list,currentPage)
 
-                console.log(listData);
+                document.getElementById('total_words_number').textContent=listData.length;
                 window.addEventListener('resize',(e)=>{
                     list = splitArray(listData, window.innerWidth);
                     currentPage=list.length;
@@ -79,9 +104,9 @@
                 random.addEventListener('click',()=>{
                     listData=randomize(listData);
                     list = splitArray(listData,window.innerWidth);
-                    console.log(listData)
-                    console.log(list);
-                    createWordsList(list[currentPage-1]);
+                    currentPage=list.length;
+                    document.getElementById('pagenation').style.display='none';
+                    createWordsList(list[0]);
                 })
             }
             httpRequest.open('GET', 'http://localhost:8000');
@@ -101,7 +126,7 @@
                 }
                 httpRequest.open('POST','http://localhost:8000');
                 httpRequest.setRequestHeader('Content-Type', 'text/plain');
-                httpRequest.send(english.value+'-'+korean.value);
+                httpRequest.send(english.value+'_'+korean.value);
                 httpRequest.onload=function (data){
                     const answer = data.target.response;
                    if(answer ==='existing'){
@@ -140,6 +165,10 @@
             for(let i=0;i<list.length;i++){
                 const wordBox = document.createElement('div');
                 wordBox.classList.add('word_box');
+                wordBox.draggable = true;
+                wordBox.addEventListener('dragstart',(e)=>{
+                    e.dataTransfer.setData('text/plain',list[i][0]+'_'+list[i][1])
+                })
                 const englishWord = document.createElement('div');
                 englishWord.classList.add('english_word');
                 englishWord.textContent=list[i][0];
@@ -149,12 +178,10 @@
                 wordBox.appendChild(englishWord);
                 wordBox.appendChild(koreanWord);
                 wordBox.addEventListener('dblclick',()=>{
-                    console.log(list[i]);
                     httpRequest.open('POST','http://localhost:8000/delete');
                     httpRequest.setRequestHeader('Content-Type','text/plain');
                     httpRequest.send(list[i][0]);
                     httpRequest.onload=()=>{
-                        console.log('delete 성공');
                         wordsListsContainer.innerHTML='';
                         loadList();
                     }
@@ -164,13 +191,16 @@
                 if(count%33==0){
                     wordsContainer=document.createElement('div');
                     wordsContainer.classList.add('words_container');
-                    wordsListsContainer.appendChild(wordsContainer);
+                    if(window.innerWidth > 1000 && count < 132){
+                        wordsListsContainer.appendChild(wordsContainer);
+                    }else if(window.innerWidth <= 1000 && count < 66){
+                        wordsListsContainer.appendChild(wordsContainer);
+                    }
                 }
             }
         }
         function createPagenation(length,list,currentPage){
             const pagenation=document.getElementById('pagenation');
-            console.log('in createPagenation', currentPage);
             pagenation.innerHTML='';
             if(length===1){
                 pagenation.style.display='none';
@@ -184,7 +214,7 @@
                         div.classList.add('currentPage');
                     }
                     div.addEventListener('click',()=>{
-                        console.log(currentPage);
+                        document.getElementById('visible').checked=false;
                         currentPage=i;
                         createWordsList(list[currentPage-1]);
                         createPagenation(length,list,currentPage);
@@ -211,7 +241,6 @@
 <body>
     <h1>토익 영단어 도우미</h1>
     <div id="option_box">
-        <div id="drag_box"></div>
         <div id="input_word_box">
             <input type="text" id="inputEnglish" placeholder="English..."  pattern="[A-Za-z0-9]*">
             <input type="text" id="inputKorean" placeholder="Korean..."> 
@@ -232,7 +261,12 @@
         <legend>어려운 단어</legend>
     </fieldset>
     <div class="pagenation_box">
+        <div id="drag_box" droppable="true">어려운 단어...</div>
         <div id="pagenation"></div>
+        <div id="numbers">
+            총 단어 수 : <span id="total_words_number"></span><br/>
+            어려운 단어 : <span id="difficult_words_number">0</span>
+        </div>
     </div>
 </body>
 </html>

@@ -32,7 +32,7 @@ h1{
     margin:0 auto;
     margin-top:10px;
     width:90%;
-    height:85%;
+    height:82%;
     border:1px solid black;
     overflow:hidden;
 }
@@ -87,12 +87,13 @@ legend
 }
 .pagenation_box{
     position:absolute;
-    bottom:0.5%;
+    bottom:1.5%;
     width:100%;
     height:5%;
     display:flex;
     justify-content:center;
     align-items:center;
+    overflow:visible;
 }
 #pagenation{
     width:30%;
@@ -105,6 +106,33 @@ legend
 .currentPage{
     color:black;
     font-weight:bold;
+}
+#numbers{
+    position:absolute;
+    bottom:3%;
+    right:6%;
+    text-align:right;
+}
+#numbers > span {
+    font-weight:bold;
+}
+#drag_box{
+    width:200px;
+    height:60px;
+    border:3px solid black;
+    position:absolute;
+    z-index:3;
+    left:5%;
+    bottom:3%;  
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#999999;
+    font-weight:bold;
+}
+.drag_box_hover{
+    background:black;
+    color:white;
 }
 @media screen and (max-width:1000px){
     #drag_box{

@@ -7,6 +7,12 @@ fs.open(__dirname + '/list.json', 'a', (err, fd) => {
 		fs.close(fd);
 	}
 });
+fs.open(__dirname + '/difficult.json', 'a', (err, fd) => {
+	if (err) {
+		console.error(err);
+		fs.close(fd);
+	}
+});
 http.createServer((req, res) => {
 	const headers = {
 		'Access-Control-Allow-Origin': '*',
@@ -14,7 +20,6 @@ http.createServer((req, res) => {
 		'Access-Control-Max-Age': 2592000, // 30 days
 		/** add other headers as per requirement */
 	};
-	const path = req.url;
 	if (req.method === 'GET') {
 		res.writeHead(200, headers);
 
@@ -26,7 +31,17 @@ http.createServer((req, res) => {
 			if (!data.toString()) {
 				res.end();
 			} else {
-				res.end(data.toString());
+				fs.readFile(__dirname + '/difficult.json', (err, diff) => {
+					if(err) {
+						console.error(err);
+						return;
+					}
+					if(!data.toString()){
+						res.end(data);
+					}else{
+						res.end(data.toString()+'_'+diff.toString())
+					}
+				})
 			}
 		});
 	}
@@ -34,7 +49,7 @@ http.createServer((req, res) => {
 		if (req.url === '/') {
 			req.setEncoding('utf-8');
 			req.on('data', function (data) {
-				const newWord = data.split('-');
+				const newWord = data.split('_');
 				fs.readFile(__dirname + '/list.json', (err, list) => {
 					if (err) {
 						return console.error(err);
@@ -51,7 +66,7 @@ http.createServer((req, res) => {
 								console.log(err);
 							}
 							res.writeHead(200, headers);
-							res.write('enroll success');
+							res.write(JSON.stringify(words));
 							res.end();
 						});
 					}
@@ -71,11 +86,36 @@ http.createServer((req, res) => {
 							console.log(err);
 						}
 						res.writeHead(200, headers);
-						res.write('enroll success');
 						res.end();
 					});
 				});
 			});
+		} else if(req.url==='/difficult'){
+			req.setEncoding('utf-8');
+			req.on('data', function (data) {
+				const newWord = data.split('_');
+				fs.readFile(__dirname + '/difficult.json', (err, list) => {
+					if (err) {
+						return console.error(err);
+					}
+					const words = list.toString() ? JSON.parse(list.toString()) : {};
+					if (words[newWord[0]]) {
+						res.writeHead(200, headers);
+						res.write('existing');
+						res.end();
+					} else {
+						words[newWord[0]] = newWord[1];
+						fs.writeFile(__dirname + '/difficult.json', JSON.stringify(words), 'utf8', function (err) {
+							if (err) {
+								console.log(err);
+							}
+							res.writeHead(200, headers);
+							res.write(Object.keys(words).length.toString());
+							res.end();
+						});
+					}
+				});
+			})
 		}
 	}
 }).listen(8000);
