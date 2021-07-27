@@ -174,4 +174,13 @@ legend
     #drag_box{
         display:none;
     }
+    .words_container{
+        width:48%;
+    }
+    .options{
+        width:45%;
+    }
+    #default{
+        border:0px;
+    }
 }

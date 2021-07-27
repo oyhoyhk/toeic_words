@@ -20,7 +20,7 @@
                 console.log(diffList);
                 console.log(mode);
             })
-            loadList();
+            loadList(true);
 
             const submit = document.getElementById('submit');
             const english = document.getElementById('inputEnglish');
@@ -46,7 +46,7 @@
                 httpRequest.setRequestHeader('Content-Type', 'text/plain');
                 httpRequest.send(data);
                 httpRequest.onload = () => {
-                    loadList();
+                    loadList(false);
                     
                 }
 
@@ -111,7 +111,7 @@
                 defaultMode.classList.add('course_now');
                 difficultMode.classList.remove('course_now');
                 renderingPage(mode);
-                document.getElementById('drag_box').style.display='block';
+                document.getElementById('drag_box').style.display='flex';
             })
             difficultMode.addEventListener('click', () => {
                 if (mode === 'difficult') return;
@@ -124,7 +124,7 @@
             })
         }
 
-        function loadList() {
+        function loadList(rendering) {
             fetch(SERVER)
                 .then(res => {
                     return res.json();
@@ -135,8 +135,12 @@
 
                     defaultList = stringToArray(defaultList);
                     diffList = stringToArray(diffList);
+                    if(rendering){
+                        renderingPage(mode);
+                    }
 
-                    renderingPage(mode);
+                    document.getElementById('total_words_number').textContent = defaultList.length;
+                    document.getElementById('difficult_words_number').textContent = diffList.length;
 
 
                 })
@@ -149,9 +153,6 @@
 
             createWordsList(list[currentPage - 1])
             createPagenation(list.length, list, currentPage);
-
-            document.getElementById('total_words_number').textContent = defaultList.length;
-            document.getElementById('difficult_words_number').textContent = diffList.length;
 
             window.addEventListener('resize', (e) => {
                 list = splitArray(defaultList, window.innerWidth);
@@ -184,7 +185,7 @@
                 }
                 english.value = '';
                 korean.value = '';
-                loadList();
+                loadList(true);
                 document.getElementById('inputEnglish').focus();
             }
         }
@@ -244,7 +245,7 @@
                     httpRequest.send(list[i][0]);
                     httpRequest.onload = () => {
                         wordsListsContainer.innerHTML = '';
-                        loadList();
+                        loadList(true);
                     }
                 })
                 wordsContainer.appendChild(wordBox);
