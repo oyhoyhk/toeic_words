@@ -6,9 +6,225 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toeic Words</title>
-    <link rel="stylesheet" href="./toeic_words.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        h1 {
+            text-align: center
+        }
+
+        #option_box {
+            width: 90%;
+            height: 30px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        #inputEnglish {
+            ime-mode: inactive;
+        }
+
+        #drag_box {
+            width: 150px;
+            height: 100%;
+        }
+
+        #word_list {
+            margin: 0 auto;
+            margin-top: 10px;
+            width: 90%;
+            height: 82%;
+            border: 1px solid black;
+            overflow: hidden;
+        }
+
+        #difficult_list {
+            display: none;
+            margin: 0 auto;
+            margin-top: 40px;
+            width: 90%;
+            height: 30%;
+            border: 1px solid black;
+        }
+
+        legend {
+            text-align: center;
+        }
+
+        #words_lists_container {
+            width: 100%;
+            height: 100%;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .words_container {
+            display: inline-block;
+            width: 24%;
+            height: 100%;
+            display: flex;
+            justify-content: flex-start;
+            flex-direction: column;
+            margin-right: 45px;
+        }
+
+        .words_container:last-of-type {
+            margin-right: 0;
+        }
+
+        .word_box {
+            display: flex;
+            justify-content: space-between;
+
+        }
+
+        .english_word {
+            width: 40%;
+            border-right: 1px solid black;
+        }
+
+        .korean_word {
+            width: 50%;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        #random {
+            margin-right: 20px;
+        }
+
+        .pagenation_box {
+            position: absolute;
+            bottom: 1.5%;
+            width: 100%;
+            height: 5%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: visible;
+        }
+
+        #pagenation {
+            width: 30%;
+            height: 100%;
+            display: flex;
+            justify-content: space-around;
+            font-size: 1.5rem;
+            color: #bbb;
+        }
+
+        .currentPage {
+            color: black;
+            font-weight: bold;
+        }
+
+        #numbers {
+            position: absolute;
+            bottom: 3%;
+            right: 6%;
+            text-align: right;
+        }
+
+        #numbers>span {
+            font-weight: bold;
+        }
+
+        #drag_box {
+            width: 200px;
+            height: 60px;
+            border: 3px solid black;
+            position: absolute;
+            z-index: 3;
+            left: 5%;
+            bottom: 3%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #999999;
+            font-weight: bold;
+        }
+
+        .drag_box_hover {
+            background: black;
+            color: white;
+        }
+
+        .options {
+            width: 30%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #course {
+            width: 30%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1rem;
+
+        }
+
+        #default {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            border-right: 2px solid black;
+            cursor: pointer;
+        }
+
+        #difficult {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .course_now {
+            font-weight: bold;
+        }
+
+        @media screen and (max-width:1000px) {
+            #drag_box {
+                display: none;
+            }
+
+            .words_container {
+                width: 48%;
+            }
+
+            .options {
+                width: 45%;
+            }
+
+            #default {
+                border: 0px;
+            }
+        }
+    </style>
     <script>
-        const SERVER = 'http://localhost:8000';
+        const SERVER = 'http://34.85.50.171/';
         let defaultList, diffList;
         let currentPage;
         let mode = 'default';
@@ -42,7 +258,7 @@
                 e.target.classList.remove('drag_box_hover');
                 const data = e.dataTransfer.getData("text")
                 const httpRequest = new XMLHttpRequest();
-                httpRequest.open('POST', 'http://localhost:8000/difficult');
+                httpRequest.open('POST', `${SERVER}/difficult`);
                 httpRequest.setRequestHeader('Content-Type', 'text/plain');
                 httpRequest.send(data);
                 httpRequest.onload = () => {
@@ -125,7 +341,7 @@
         }
 
         function loadList(rendering) {
-            fetch(SERVER)
+            fetch('./data')
                 .then(res => {
                     return res.json();
                 }).then(data => {
@@ -175,7 +391,7 @@
                 korean.value = '';
                 return;
             }
-            httpRequest.open('POST', 'http://localhost:8000');
+            httpRequest.open('POST',  `${SERVER}`);
             httpRequest.setRequestHeader('Content-Type', 'text/plain');
             httpRequest.send(english.value + '_' + korean.value);
             httpRequest.onload = function (data) {
@@ -240,7 +456,7 @@
                 wordBox.appendChild(englishWord);
                 wordBox.appendChild(koreanWord);
                 wordBox.addEventListener('dblclick', () => {
-                    httpRequest.open('POST', 'http://localhost:8000/delete');
+                    httpRequest.open('POST', `${SERVER}/delete`);
                     httpRequest.setRequestHeader('Content-Type', 'text/plain');
                     httpRequest.send(list[i][0]);
                     httpRequest.onload = () => {

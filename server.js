@@ -21,28 +21,38 @@ http.createServer((req, res) => {
 		/** add other headers as per requirement */
 	};
 	if (req.method === 'GET') {
-		res.writeHead(200, headers);
-		fs.readFile(__dirname + '/list.json', (err, data) => {
-			if (err) {
-				console.error(err);
-				return;
-			}
-			if (!data.toString()) {
-				res.end();
-			} else {
-				fs.readFile(__dirname + '/difficult.json', (err, diff) => {
-					if (err) {
-						console.error(err);
-						return;
-					}
-					if (!data.toString()) {
-						res.end(data);
-					} else {
-						res.end(JSON.stringify({ defaultList: data.toString(), diffList: diff.toString() }));
-					}
-				});
-			}
-		});
+		if (req.url === '/') {
+			res.writeHead(200, { 'Content-Type': 'text/html' });
+			fs.readFile(__dirname + '/toeic_words.html', (err, data) => {
+				if (err) {
+					return console.error(err);
+				}
+				res.end(data, 'utf-8');
+			});
+		} else if (req.url === '/data') {
+			res.writeHead(200, headers);
+			fs.readFile(__dirname + '/list.json', (err, data) => {
+				if (err) {
+					console.error(err);
+					return;
+				}
+				if (!data.toString()) {
+					res.end();
+				} else {
+					fs.readFile(__dirname + '/difficult.json', (err, diff) => {
+						if (err) {
+							console.error(err);
+							return;
+						}
+						if (!data.toString()) {
+							res.end(data);
+						} else {
+							res.end(JSON.stringify({ defaultList: data.toString(), diffList: diff.toString() }));
+						}
+					});
+				}
+			});
+		}
 	}
 	if (req.method === 'POST') {
 		if (req.url === '/') {
