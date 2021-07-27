@@ -22,7 +22,6 @@ http.createServer((req, res) => {
 	};
 	if (req.method === 'GET') {
 		res.writeHead(200, headers);
-
 		fs.readFile(__dirname + '/list.json', (err, data) => {
 			if (err) {
 				console.error(err);
@@ -32,16 +31,16 @@ http.createServer((req, res) => {
 				res.end();
 			} else {
 				fs.readFile(__dirname + '/difficult.json', (err, diff) => {
-					if(err) {
+					if (err) {
 						console.error(err);
 						return;
 					}
-					if(!data.toString()){
+					if (!data.toString()) {
 						res.end(data);
-					}else{
-						res.end(data.toString()+'_'+diff.toString())
+					} else {
+						res.end(JSON.stringify({ defaultList: data.toString(), diffList: diff.toString() }));
 					}
-				})
+				});
 			}
 		});
 	}
@@ -90,7 +89,7 @@ http.createServer((req, res) => {
 					});
 				});
 			});
-		} else if(req.url==='/difficult'){
+		} else if (req.url === '/difficult') {
 			req.setEncoding('utf-8');
 			req.on('data', function (data) {
 				const newWord = data.split('_');
@@ -115,7 +114,7 @@ http.createServer((req, res) => {
 						});
 					}
 				});
-			})
+			});
 		}
 	}
 }).listen(8000);

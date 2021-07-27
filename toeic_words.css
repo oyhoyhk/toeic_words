@@ -57,7 +57,7 @@ legend
 }
 .words_container{
     display:inline-block;
-    width:330px;
+    width:24%;
     height:100%;
     display:flex;
     justify-content:flex-start;
@@ -133,6 +133,42 @@ legend
 .drag_box_hover{
     background:black;
     color:white;
+}
+.options{
+    width:30%;
+    height:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+#course{
+    width:30%;
+    height:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:1.1rem;
+
+}
+#default{
+    width:50%;
+    height:100%;
+    display:flex;
+    justify-content:flex-start;
+    align-items:center;
+    border-right:2px solid black;
+    cursor:pointer;
+}
+#difficult{
+    width:50%;
+    height:100%;
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    cursor:pointer;
+}
+.course_now{
+    font-weight:bold;
 }
 @media screen and (max-width:1000px){
     #drag_box{
