@@ -74,20 +74,39 @@ http.createServer((req, res) => {
 		} else if (req.url === '/delete') {
 			req.setEncoding('utf-8');
 			req.on('data', function (data) {
-				fs.readFile(__dirname + '/list.json', (err, list) => {
-					if (err) {
-						return console.error(err);
-					}
-					const words = JSON.parse(list.toString());
-					delete words[data];
-					fs.writeFile(__dirname + '/list.json', JSON.stringify(words), 'utf8', function (err) {
+				console.log(data);
+				if(data.split('_')[0]==='default'){
+					fs.readFile(__dirname + '/list.json', (err, list) => {
 						if (err) {
-							console.log(err);
+							return console.error(err);
 						}
-						res.writeHead(200, headers);
-						res.end();
+						const words = JSON.parse(list.toString());
+						delete words[data.split('_')[1]];
+						fs.writeFile(__dirname + '/list.json', JSON.stringify(words), 'utf8', function (err) {
+							if (err) {
+								console.log(err);
+							}
+							res.writeHead(200, headers);
+							res.end();
+						});
 					});
-				});
+				}else {
+					fs.readFile(__dirname + '/difficult.json', (err, list) => {
+						if (err) {
+							return console.error(err);
+						}
+						const words = JSON.parse(list.toString());
+						delete words[data.split('_')[1]];
+						fs.writeFile(__dirname + '/difficult.json', JSON.stringify(words), 'utf8', function (err) {
+							if (err) {
+								console.log(err);
+							}
+							res.writeHead(200, headers);
+							res.end();
+						});
+					});
+				}
+				
 			});
 		} else if (req.url === '/difficult') {
 			req.setEncoding('utf-8');

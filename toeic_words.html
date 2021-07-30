@@ -53,8 +53,7 @@
             })
 
             random.addEventListener('click', () => {
-                console.log(mode === 'default' ? defaultList : diffList);
-                createWordsList(randomize(splitArray(mode === 'default' ? defaultList : diffList,window.innerWidth)[0]));
+                createWordsList(randomize(mode === 'default' ? defaultList : diffList,window.innerWidth));
                 document.getElementById('pagenation').style.display = 'none';
             })
 
@@ -175,7 +174,7 @@
                 korean.value = '';
                 return;
             }
-            httpRequest.open('POST', 'http://localhost:8000');
+            httpRequest.open('POST', SERVER);
             httpRequest.setRequestHeader('Content-Type', 'text/plain');
             httpRequest.send(english.value + '_' + korean.value);
             httpRequest.onload = function (data) {
@@ -240,9 +239,9 @@
                 wordBox.appendChild(englishWord);
                 wordBox.appendChild(koreanWord);
                 wordBox.addEventListener('dblclick', () => {
-                    httpRequest.open('POST', 'http://localhost:8000/delete');
+                    httpRequest.open('POST', SERVER+'/delete');
                     httpRequest.setRequestHeader('Content-Type', 'text/plain');
-                    httpRequest.send(list[i][0]);
+                    httpRequest.send(mode+'_'+list[i][0]);
                     httpRequest.onload = () => {
                         wordsListsContainer.innerHTML = '';
                         loadList(true);
@@ -290,11 +289,12 @@
         }
 
         function randomize(arr) {
+            const temp = [...arr];
             const res = [];
-            const counts = arr.length;
-            for (let i = 0; i < counts; i++) {
-                const randomNum = Math.floor(Math.random() * (arr.length));
-                res.push(arr.splice(randomNum, 1)[0]);
+            const counts = window.innerWidth > 1000 ? 132 : 66;
+            for (let i = 0; i < (counts > arr.length ? arr.length : counts) ; i++) {
+                const randomNum = Math.floor(Math.random() * (temp.length));
+                res.push(temp.splice(randomNum, 1)[0]);
             }
             return res;
         }
